@@ -1,1 +1,208 @@
+---
+title: "Predicting Hall of Famers"
+subtitle: "Asking the numbers for their opinion"
+author: "Ethan Abbott"
+format:
+  html:
+    self-contained: true
+    page-layout: full
+    title-block-banner: true
+    toc: true
+    toc-depth: 3
+    toc-location: body
+    number-sections: false
+    html-math-method: katex
+    code-fold: true
+    code-summary: "Show the code"
+    code-overflow: wrap
+    code-copy: hover
+    code-tools:
+        source: false
+        toggle: true
+        caption: See code
+execute: 
+  warning: false
+    
+---
 
+```{python}
+# Import necessary libraries and data
+import pandas as pd
+import numpy as np
+from lets_plot import *
+LetsPlot.setup_html()
+import sklearn
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
+from sklearn.preprocessing import MinMaxScaler
+from xgboost import XGBClassifier
+
+general = pd.read_csv("https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qbgeneral.csv")
+
+super_bowls = pd.read_csv("https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qbsuperbowls.csv")
+
+hof = pd.read_csv("https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qbhof.csv")
+
+pro_bowls = pd.read_csv("https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qbprobowls.csv")
+
+all_pros = pd.read_csv("https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qballpros.csv")
+```
+
+```{python}
+# 1). Preprocessing data
+
+# Drop rank and player columns from data frames
+unwanted_columns = ['Rk', 'Player']
+super_bowls = super_bowls.drop(columns = unwanted_columns)
+hof = hof.drop(columns = unwanted_columns)
+pro_bowls = pro_bowls.drop(columns = unwanted_columns)
+all_pros = all_pros.drop(columns = unwanted_columns)
+
+# Get Super Bowl count
+super_bowl_count = super_bowls['player_id'].value_counts().reset_index()
+super_bowl_count.columns = ['player_id', 'super_bowls']
+
+# Fill hof column with positive
+hof['hof'] = 1
+
+# Merge data frames into one
+data_frames = [all_pros, super_bowl_count, hof]
+df = pd.merge(
+    left = general,
+    right = pro_bowls,
+    how = "left",
+    on = "player_id")
+
+for data_frame in data_frames:
+    df = pd.merge(
+    left = df,
+    right = data_frame,
+    how = "left",
+    on = "player_id")
+
+#Fill N/As
+int_columns = ['hof', 'super_bowls', 'Sk', 'Yds.1', 'W', 'L', 'T', '1D']
+float_columns = ['Cmp%', 'TD%', 'Int%', 'Rate', 'Sk%', 'Y/A', 'AY/A', 'ANY/A', 'Y/C', 'Succ%', 'Y/A.1', 'Succ%.1']
+
+for column in int_columns:
+    df[column] = df[column].fillna(0).astype(int)
+
+for column in float_columns:
+    df[column] = df[column].fillna(0)
+
+# Create Hall of Fame Eligible Column
+df['eligible'] = np.where(df['To'] >= 2020, 0, 1)
+
+# Create 16 games column
+df['16_games'] = round(df['G'] / 16, 2)
+
+# Create W% column
+df['W%'] = round(df['W'] / (df['W'] + df['L'] + df['T']), 2).fillna(0)
+
+
+# Create per season columns 
+df['passing_yards_per_16_games'] = round(df['Yds'] / df['16_games'], 2)
+df['passing_attempts_per_16_games'] = round(df['Att'] / df['16_games'], 2)
+df['passing_tds_per_16_games'] = round(df['TD'] / df['16_games'], 2)
+df['int_per_16_games'] = round(df['Int'] / df['16_games'], 2)
+df['pick_6_per_16_games'] = round(df['Yds'] / df['16_games'], 2)
+df['sacks_per_16_games'] = round(df['Sk'] / df['16_games'], 2)
+df['sacks_yards_per_16_games'] = round(df['Yds.1'] / df['16_games'], 2)
+df['wins_per_16_games'] = round(df['W'] / df['16_games'], 2)
+df['losses_per_16_games'] = round(df['L'] / df['16_games'], 2)
+df['ties_per_16_games'] = round(df['T'] / df['16_games'], 2)
+df['fourth_quarter_comebacks_per_16_games'] = round(df['4QC'] / df['16_games'], 2)
+df['game_winning_drives_per_16_games'] = round(df['GWD'] / df['16_games'], 2)
+df['rushing_yards_per_16_games'] = round(df['Yds.2'] / df['16_games'], 2)
+df['rushing_tds_per_16_games'] = round(df['TD.1'] / df['16_games'], 2)
+df['rushing_first_downs_per_16_games'] = round(df['Sk'] / df['16_games'], 2)
+df['pro_bowls_per_16_games'] = round(df['Pro_Bowls'] / df['16_games'], 2)
+df['first_team_all_pros_per_16_games'] = round(df['AP1'] / df['16_games'], 2)
+df['super_bowls_per_16_games'] = round(df['super_bowls'] / df['16_games'], 2)
+
+# Drop more unwanted columns
+df = df.drop(columns = ['Rk', 'Age', 'player_id'])
+
+# Rename columns
+df.columns = ['player', 'career_start', 'career_end', 'games', 'games_started', 'completions', 'passing_attempts', 'incompletions', 'completion_%', 'passing_yards', 'passing_tds', 'interceptions', 'pick_6s', 'touchdown_%', 'int_%', 'passer_rating', 'sacks_taken', 'sack_yards', 'sack_%', 'passing_yards_per_attempt', 'adjusted_passing_yards_per_attempt', 'adjusted_net_passing_yards_per_attempt', 'passing_yards_per_completion', 'passing_yards_per_game', 'pass_success_rate', 'wins', 'losses', 'ties', 'fourth_quarter_comebacks', 'game_winning_drives', 'rushing_attempts', 'rushing_yards', 'rushing_yards_per_attempt', 'rushing_touchdowns', 'rushing_yards_per_game', 'rushing_first_downs', 'rush_success_rate', 'pro_bowls', 'first_team_all_pros', 'super_bowls', 'hall_of_fame', 'hall_of_fame_eligible', '16_games', 'winning_%', 'passing_yards_per_16_games', 'passing_attempts_per_16_games', 'passing_tds_per_16_games', 'int_per_16_games', 'pick_6_per_16_games', 'sacks_per_16_games', 'sacks_yards_per_16_games', 'wins_per_16_games', 'losses_per_16_games', 'ties_per_16_games', 'fourth_quarter_comebacks_per_16_games', 'game_winning_drives_per_16_games', 'rushing_yards_per_16_games', 'rushing_tds_per_16_games', 'rushing_first_downs_per_16_games', 'pro_bowls_per_16_games', 'first_team_all_pros_per_16_games', 'super_bowls_per_16_games']
+
+# Scale values using MinMaxScaler
+scaler = MinMaxScaler()
+numeric_columns = ['games', 'games_started', 'completions', 'passing_attempts', 'incompletions', 'completion_%', 'passing_yards', 'passing_tds', 'interceptions', 'pick_6s', 'touchdown_%', 'int_%', 'passer_rating', 'sacks_taken', 'sack_yards', 'sack_%', 'passing_yards_per_attempt', 'adjusted_passing_yards_per_attempt', 'adjusted_net_passing_yards_per_attempt', 'passing_yards_per_completion', 'passing_yards_per_game', 'pass_success_rate', 'wins', 'losses', 'ties', 'fourth_quarter_comebacks', 'game_winning_drives', 'rushing_attempts', 'rushing_yards', 'rushing_yards_per_attempt', 'rushing_touchdowns', 'rushing_yards_per_game', 'rushing_first_downs', 'rush_success_rate', 'pro_bowls', 'first_team_all_pros', 'super_bowls', 'hall_of_fame', 'hall_of_fame_eligible', '16_games', 'winning_%', 'passing_yards_per_16_games', 'passing_attempts_per_16_games', 'passing_tds_per_16_games', 'int_per_16_games', 'pick_6_per_16_games', 'sacks_per_16_games', 'sacks_yards_per_16_games', 'wins_per_16_games', 'losses_per_16_games', 'ties_per_16_games', 'fourth_quarter_comebacks_per_16_games', 'game_winning_drives_per_16_games', 'rushing_yards_per_16_games', 'rushing_tds_per_16_games', 'rushing_first_downs_per_16_games', 'pro_bowls_per_16_games', 'first_team_all_pros_per_16_games', 'super_bowls_per_16_games']
+
+for column in numeric_columns:
+    df[column] = scaler.fit_transform(df[[column]])
+
+# Split into eligible and ineligible data frames
+eligible = df[df['hall_of_fame_eligible'] == 1]
+ineligible = df[df['hall_of_fame_eligible'] == 0]
+```
+
+```{python}
+# 2). Selection, training, and use of a machine learning model
+
+# Create X and y from eligible data set
+X = eligible.drop(columns = ['hall_of_fame', 'player', 'hall_of_fame_eligible'])
+y = eligible['hall_of_fame']
+
+# Split into test and training data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 30)
+```
+
+```{python}
+# Decision Tree
+tree = DecisionTreeClassifier()
+tree.fit(X_train, y_train)
+tree_prediction = tree.predict(X_test)
+tree_report = classification_report(y_test, tree_prediction)
+print(tree_report)
+
+# Random Forest
+forest = RandomForestClassifier()
+forest.fit(X_train, y_train)
+forest_prediction = forest.predict(X_test)
+forest_report = classification_report(y_test, forest_prediction)
+print(forest_report)
+
+# XGBoost
+xg = XGBClassifier(scale_pos_weight = 27.37)
+xg.fit(X_train, y_train)
+xg_prediction = xg.predict(X_test)
+xg_report = classification_report(y_test, xg_prediction)
+print(xg_report)
+
+# Use XGBoost model to determine most important statistics as well as make predictions on ineligible players
+
+important_stats = pd.DataFrame({'importance': xg.feature_importances_,'stat': X_train.columns}).sort_values('importance', ascending = True).query('importance >= .05')
+
+p = (
+    ggplot(
+        data = important_stats,
+        mapping = aes(
+            x = 'importance',
+            y = 'stat'))
+        + geom_bar(stat = 'identity')
+)
+
+print(p)
+
+Z = ineligible.drop(columns = ['player', 'hall_of_fame_eligible', 'hall_of_fame'])
+
+hof_predictions = xg.predict(Z)
+
+players = pd.DataFrame({
+    'player': ineligible['player'].values,
+    'hof': hof_predictions
+})
+
+wrong_predict = xg.predict(X)
+
+wrong = pd.DataFrame({
+    'player' : eligible['player'].values,
+    'real' = eligible['hall_of_fame'].values,
+    'predicted' = wrong_predict
+}).query(['real'] != ['predicted'])
+
+```
