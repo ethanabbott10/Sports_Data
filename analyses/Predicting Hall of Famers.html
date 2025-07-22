@@ -3119,33 +3119,69 @@ vertical-align: -.125em;
 
 
 
-<div id="1bfa85f9" class="cell" data-execution_count="1">
+<div id="ccae35d4" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import necessary libraries and data</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lets_plot <span class="im">import</span> <span class="op">*</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sklearn</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeClassifier </span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> MinMaxScaler</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> xgboost <span class="im">import</span> XGBClassifier</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>general <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qbgeneral.csv&quot;</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>LetsPlot.setup_html()</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sklearn</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeClassifier </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> MinMaxScaler</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> xgboost <span class="im">import</span> XGBClassifier</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> imblearn.over_sampling <span class="im">import</span> SMOTE</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>super_bowls <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qbsuperbowls.csv&quot;</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>general <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qbgeneral.csv&quot;</span>)</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>hof <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qbhof.csv&quot;</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>super_bowls <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qbsuperbowls.csv&quot;</span>)</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>pro_bowls <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qbprobowls.csv&quot;</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>hof <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qbhof.csv&quot;</span>)</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>all_pros <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qballpros.csv&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>pro_bowls <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qbprobowls.csv&quot;</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>all_pros <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://raw.githubusercontent.com/ethanabbott10/Sports_Data/refs/heads/main/data/qballpros.csv&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-display">
+
+            <div id="m7oqFo"></div>
+            <script type="text/javascript" data-lets-plot-script="library">
+                if(!window.letsPlotCallQueue) {
+                    window.letsPlotCallQueue = [];
+                }; 
+                window.letsPlotCall = function(f) {
+                    window.letsPlotCallQueue.push(f);
+                };
+                (function() {
+                    var script = document.createElement("script");
+                    script.type = "text/javascript";
+                    script.src = "https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.2/js-package/distr/lets-plot.min.js";
+                    script.onload = function() {
+                        window.letsPlotCall = function(f) {f();};
+                        window.letsPlotCallQueue.forEach(function(f) {f();});
+                        window.letsPlotCallQueue = [];
+                        
+                    };
+                    script.onerror = function(event) {
+                        window.letsPlotCall = function(f) {};    // noop
+                        window.letsPlotCallQueue = [];
+                        var div = document.createElement("div");
+                        div.style.color = 'darkred';
+                        div.textContent = 'Error loading Lets-Plot JS';
+                        document.getElementById("m7oqFo").appendChild(div);
+                    };
+                    var e = document.getElementById("m7oqFo");
+                    e.appendChild(script);
+                })()
+            </script>
+            
 </div>
-<div id="16380461" class="cell" data-execution_count="2">
+</div>
+<div id="51374769" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1). Preprocessing data</span></span>
@@ -3237,20 +3273,24 @@ vertical-align: -.125em;
 <span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>ineligible <span class="op">=</span> df[df[<span class="st">&#39;hall_of_fame_eligible&#39;</span>] <span class="op">==</span> <span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="c8a474e5" class="cell" data-execution_count="3">
+<div id="34aee368" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2). Selection, training, and use of a machine learning model</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Create X and y from eligible data set</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> eligible.drop(columns <span class="op">=</span> [<span class="st">&#39;hall_of_fame&#39;</span>, <span class="st">&#39;player&#39;</span>])</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> eligible.drop(columns <span class="op">=</span> [<span class="st">&#39;hall_of_fame&#39;</span>, <span class="st">&#39;player&#39;</span>, <span class="st">&#39;hall_of_fame_eligible&#39;</span>])</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> eligible[<span class="st">&#39;hall_of_fame&#39;</span>]</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Split into test and training data</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size <span class="op">=</span> <span class="dv">30</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size <span class="op">=</span> <span class="dv">20</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># SMOTE to help with inbalanced data</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#sm = SMOTE()</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#X_sm, y_sm = sm.fit_resample(X_train, y_train)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="afce8829" class="cell" data-execution_count="4">
+<div id="6c6aab90" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Decision Tree</span></span>
@@ -3276,53 +3316,62 @@ vertical-align: -.125em;
 <span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Use XGBoost model to determine most important statistics as well as make predictions on ineligible players</span></span>
 <span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>important_stats <span class="op">=</span> pd.DataFrame({<span class="st">&#39;importance&#39;</span>: xg.feature_importances_,<span class="st">&#39;stat&#39;</span>: X_train.columns}).sort_values(<span class="st">&#39;importance&#39;</span>, ascending <span class="op">=</span> <span class="va">False</span>).query(<span class="st">&#39;importance &gt;= .1&#39;</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>important_stats <span class="op">=</span> pd.DataFrame({<span class="st">&#39;importance&#39;</span>: xg.feature_importances_,<span class="st">&#39;stat&#39;</span>: X_train.columns}).sort_values(<span class="st">&#39;importance&#39;</span>, ascending <span class="op">=</span> <span class="va">True</span>).query(<span class="st">&#39;importance &gt;= .05&#39;</span>)</span>
 <span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
 <span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> important_stats,</span>
 <span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        mapping <span class="op">=</span> aes(</span>
 <span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> <span class="st">&#39;importance&#39;</span>,</span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>            y <span class="op">=</span> <span class="st">&#39;stat&#39;</span>)</span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> geom_bar(stat <span class="op">=</span> <span class="st">&#39;identity&#39;</span>)</span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>            y <span class="op">=</span> <span class="st">&#39;stat&#39;</span>))</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_bar(stat <span class="op">=</span> <span class="st">&#39;identity&#39;</span>)</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> ineligible.drop(columns <span class="op">=</span> [<span class="st">&#39;player&#39;</span>, <span class="st">&#39;hall_of_fame_eligible&#39;</span>, <span class="st">&#39;hall_of_fame&#39;</span>])</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>hof_predictions <span class="op">=</span> xg.predict(Z)</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>players <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;player&#39;</span>: ineligible[<span class="st">&#39;player&#39;</span>].values,</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;hof&#39;</span>: hof_predictions</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>wrong_predict <span class="op">=</span> xg.predict(X)</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>wrong <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;player&#39;</span> : eligible[<span class="st">&#39;player&#39;</span>].values,</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;real&#39;</span> : eligible[<span class="st">&#39;hall_of_fame&#39;</span>].values,</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;predicted&#39;</span> : wrong_predict</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>}).query(<span class="st">&#39;real != predicted&#39;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>              precision    recall  f1-score   support
 
-         0.0       1.00      0.97      0.98        29
-         1.0       0.50      1.00      0.67         1
+         0.0       1.00      1.00      1.00        19
+         1.0       1.00      1.00      1.00         1
 
-    accuracy                           0.97        30
-   macro avg       0.75      0.98      0.82        30
-weighted avg       0.98      0.97      0.97        30
-
-              precision    recall  f1-score   support
-
-         0.0       1.00      0.97      0.98        29
-         1.0       0.50      1.00      0.67         1
-
-    accuracy                           0.97        30
-   macro avg       0.75      0.98      0.82        30
-weighted avg       0.98      0.97      0.97        30
+    accuracy                           1.00        20
+   macro avg       1.00      1.00      1.00        20
+weighted avg       1.00      1.00      1.00        20
 
               precision    recall  f1-score   support
 
-         0.0       1.00      0.97      0.98        29
-         1.0       0.50      1.00      0.67         1
+         0.0       1.00      1.00      1.00        19
+         1.0       1.00      1.00      1.00         1
 
-    accuracy                           0.97        30
-   macro avg       0.75      0.98      0.82        30
-weighted avg       0.98      0.97      0.97        30
+    accuracy                           1.00        20
+   macro avg       1.00      1.00      1.00        20
+weighted avg       1.00      1.00      1.00        20
+
+              precision    recall  f1-score   support
+
+         0.0       1.00      1.00      1.00        19
+         1.0       1.00      1.00      1.00         1
+
+    accuracy                           1.00        20
+   macro avg       1.00      1.00      1.00        20
+weighted avg       1.00      1.00      1.00        20
 </code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-                <div style="color:darkred;">
-                    Lets-plot `html` is not configured.<br> 
-                    Try to use `LetsPlot.setup_html()` before first occurrence of plot.
-                </div>    
-                
 </div>
 </div>
 
