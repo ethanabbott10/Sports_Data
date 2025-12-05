@@ -178,18 +178,7 @@ xg_prediction = xg.predict(X_test)
 xg_report = classification_report(y_test, xg_prediction)
 print(xg_report)
 
-# Use XGBoost model to determine most important statistics as well as make predictions on ineligible players
-
-important_stats = pd.DataFrame({'importance': xg.feature_importances_,'stat': X_train.columns}).sort_values('importance', ascending = True).query('importance >= .05')
-
-(
-    ggplot(
-        data = important_stats,
-        mapping = aes(
-            x = 'importance',
-            y = 'stat'))
-        + geom_bar(stat = 'identity')
-)
+# Use XGBoost model to make predictions on ineligible players
 
 Z = ineligible.drop(columns = ['player', 'hall_of_fame_eligible', 'hall_of_fame'])
 
@@ -208,4 +197,28 @@ wrong = pd.DataFrame({
     'predicted' : wrong_predict
 }).query('real != predicted')
 
+```
+
+
+```{python}
+# Create feature importance plot
+important_stats = pd.DataFrame({'importance': xg.feature_importances_,'stat': X_train.columns}).sort_values('importance', ascending = True).query('importance >= .035')
+
+(
+    ggplot(
+        data = important_stats,
+        mapping = aes(
+            y = 'importance',
+            x = 'stat'))
+        + geom_bar(stat = 'identity')
+        + labs(
+            x = 'Stat',
+            y = 'Importance',
+            title = 'What makes a Hall of Famer?',
+            subtitle = 'The stats that most strongly predict a Hall of Fame career')
+        + theme(
+            axis_text_x = element_text(
+                hjust=1),
+            panel_grid= element_blank())
+)
 ```
