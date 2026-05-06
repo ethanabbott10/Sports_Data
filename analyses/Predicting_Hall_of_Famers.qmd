@@ -140,9 +140,9 @@ for column in numeric_columns:
 eligible = df[df['hall_of_fame_eligible'] == 1]
 ineligible = df[df['hall_of_fame_eligible'] == 0]
 
-# Save each as a parquet file
-eligible.to_parquet("../data/eligible.parquet")
-ineligible.to_parquet("../data/ineligible.parquet")
+# Save each as a csv file
+eligible.to_csv("../data/eligible.csv")
+ineligible.to_csv("../data/ineligible.csv")
 ```
 
 ```{python}
